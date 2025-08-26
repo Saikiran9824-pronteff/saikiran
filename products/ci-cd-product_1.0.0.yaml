@@ -1,0 +1,30 @@
+info:
+  version: 1.0.0
+  title: ci-cd-product
+  name: ci-cd-product
+gateways:
+  - datapower-api-gateway
+plans:
+  default-plan:
+    title: Default Plan
+    description: Default Plan
+    rate-limits:
+      default:
+        value: 100/1hour
+    apis:
+      ci-cd: {}
+apis:
+  ci-cd:
+    $ref: ci-cd_1.0.0.yaml
+visibility:
+  view:
+    type: public
+    orgs: []
+    tags: []
+    enabled: true
+  subscribe:
+    type: authenticated
+    orgs: []
+    tags: []
+    enabled: true
+product: 1.0.0
