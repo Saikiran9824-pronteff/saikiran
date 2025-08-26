@@ -11,10 +11,13 @@
     <target name="login">
         <echo message="Logging into API Connect at ${apic.server}..."/>
         <exec executable="/bin/bash" failonerror="true">
+            <!-- Pass Ant properties as environment variables -->
             <env key="APIC_SERVER" value="${apic.server}"/>
             <env key="APIC_USERNAME" value="${apic.username}"/>
             <env key="APIC_PASSWORD" value="${apic.password}"/>
             <env key="APIC_REALM" value="${apic.realm}"/>
+            
+            <!-- Bash command references env vars, not Ant props -->
             <arg value="-c"/>
             <arg value="/usr/local/bin/apic login --server=$APIC_SERVER --username=$APIC_USERNAME --password=$APIC_PASSWORD --realm=$APIC_REALM --accept-license"/>
         </exec>
