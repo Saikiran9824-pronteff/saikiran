@@ -1,1 +1,52 @@
+<project name="apic-ci-cd" default="deploy" basedir=".">
+
+    <!-- Load env properties -->
+    <property file="environments/${env}.properties"/>
+
+    <!-- Login -->
+    <target name="login" depends="accept-license">
+        <exec executable="/bin/bash" failonerror="true">
+            <arg value="-c"/>
+            <arg value="/usr/local/bin/apic login --server=${apic.server} --username=${apic.username} --password=${apic.password} --realm=${apic.realm} --accept-license"/>
+        </exec>
+    </target>
+
+    <!-- Validate API -->
+    <target name="validate-api" depends="login">
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="validate"/>
+            <arg value="${api.file}"/>
+        </exec>
+    </target>
+
+    <!-- Validate Product -->
+    <target name="validate-product" depends="login">
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="validate"/>
+            <arg value="${product.file}"/>
+        </exec>
+    </target>
+
+    <!-- Publish Product -->
+    <target name="publish" depends="validate-api,validate-product">
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="publish"/>
+            <arg value="${product.file}"/>
+            <arg value="--server=${apic.server}"/>
+            <arg value="--org=${apic.org}"/>
+            <arg value="--catalog=${apic.catalog}"/>
+        </exec>
+    </target>
+
+    <!-- Deploy API -->
+    <target name="deploy" depends="publish">
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="deploy"/>
+            <arg value="${product.name}"/>
+            <arg value="--server=${apic.server}"/>
+            <arg value="--org=${apic.org}"/>
+            <arg value="--catalog=${apic.catalog}"/>
+        </exec>
+    </target>
+</project>
 
