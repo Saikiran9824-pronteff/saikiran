@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="apic-ci-cd" default="login" basedir=".">
+<project name="apic-ci-cd-login" default="login" basedir=".">
     <description>
-        Ant script for IBM API Connect CI/CD automation (Login only).
+        Ant script for IBM API Connect CI/CD automation (Login only)
     </description>
 
     <!-- Load environment properties dynamically -->
     <property file="environments/${env}.properties"/>
 
-    <!-- 🔒 Hardcoded credentials -->
-    <property name="apic.username" value="umesh"/>
-    <property name="apic.password" value="!n0r1t5@C"/>
-
-    <!-- Login -->
+    <!-- ---------------- Login ---------------- -->
     <target name="login">
         <echo message="Logging into API Connect at ${apic.server}..."/>
         <exec executable="/bin/bash" failonerror="true">
+            <!-- Pass env properties as Bash environment variables -->
             <env key="APIC_SERVER" value="${apic.server}"/>
             <env key="APIC_USERNAME" value="${apic.username}"/>
             <env key="APIC_PASSWORD" value="${apic.password}"/>
