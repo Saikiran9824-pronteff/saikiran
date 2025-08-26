@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="apic-ci-cd" default="deploy" basedir=".">
+<project name="apic-ci-cd" default="pipeline" basedir=".">
     <description>
-        Ant script for IBM API Connect CI/CD automation.
+        Ant script for IBM API Connect CI/CD automation with auto logout.
     </description>
 
-    <!-- Load environment properties dynamically (env passed via -Denv=dev/test/prod) -->
+    <!-- Load environment properties dynamically -->
     <property file="environments/${env}.properties"/>
 
     <!-- Login -->
     <target name="login">
         <echo message="Logging into API Connect at ${apic.server}..."/>
-        <exec executable="/bin/bash" failonerror="true">
-            <arg value="-c"/>
-            <arg value="/usr/local/bin/apic login --server=${apic.server} --username=${apic.username} --password=${apic.password} --realm=${apic.realm} --accept-license"/>
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="login"/>
+            <arg value="--server=${apic.server}"/>
+            <arg value="--username=${apic.username}"/>
+            <arg value="--password=${apic.password}"/>
+            <arg value="--realm=${apic.realm}"/>
+            <arg value="--accept-license"/>
         </exec>
     </target>
 
@@ -60,12 +64,18 @@
     </target>
 
     <!-- Logout -->
-    <target name="logout">
+    <target name="logout" alwaysRun="true">
         <echo message="Logging out of API Connect..."/>
-        <exec executable="/usr/local/bin/apic" failonerror="true">
+        <exec executable="/usr/local/bin/apic" failonerror="false">
             <arg value="logout"/>
             <arg value="--server=${apic.server}"/>
             <arg value="--accept-license"/>
         </exec>
+    </target>
+
+    <!-- Pipeline wrapper (ensures logout always runs) -->
+    <target name="pipeline">
+        <antcall target="deploy"/>
+        <antcall target="logout"/>
     </target>
 </project>
