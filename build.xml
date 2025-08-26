@@ -4,27 +4,25 @@
     <!-- Load environment properties dynamically -->
     <property file="environments/${env}.properties"/>
 
-    <target name="show-env">
-        <echo message="Using environment: ${env}"/>
-        <echo message="API file: ${api.file}"/>
-        <echo message="Product file: ${product.file}"/>
-    </target>
-
     <!-- Accept License -->
     <target name="accept-license">
         <echo message="Accepting IBM API Connect license..."/>
-        <exec executable="/bin/bash" failonerror="true">
-            <arg value="-c"/>
-            <arg value="/usr/local/bin/apic --accept-license"/>
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="accept-license"/>
+            <arg value="--accept"/>
         </exec>
     </target>
 
     <!-- Login -->
-    <target name="login" depends="accept-license,show-env">
+    <target name="login" depends="accept-license">
         <echo message="Logging into API Connect..."/>
-        <exec executable="/bin/bash" failonerror="true">
-            <arg value="-c"/>
-            <arg value="/usr/local/bin/apic login --server=${apic.server} --username=${apic.username} --password=${apic.password} --realm=${apic.realm} --accept-license"/>
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="login"/>
+            <arg value="--server=${apic.server}"/>
+            <arg value="--username=${apic.username}"/>
+            <arg value="--password=${apic.password}"/>
+            <arg value="--realm=${apic.realm}"/>
+            <arg value="--accept-license"/>
         </exec>
     </target>
 
