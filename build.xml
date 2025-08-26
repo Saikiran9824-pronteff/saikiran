@@ -1,34 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="apic-ci-cd" default="pipeline" basedir=".">
     <description>
-        Ant script for IBM API Connect CI/CD automation with auto logout.
+        Ant script for IBM API Connect CI/CD automation.
     </description>
 
     <!-- Load environment properties dynamically -->
     <property file="environments/${env}.properties"/>
 
+    <!-- Basic API/Product configuration -->
+    <property name="api.file" value="apis/update-api_1.0.0.yaml"/>
+    <property name="product.file" value="products/umesh_1.0.0.yaml"/>
+    <property name="product.name" value="umesh"/>
+
+    <!-- 🔒 Hardcoded credentials (replace with Jenkins credentials in prod) -->
+    <property name="apic.username" value="umesh"/>
+    <property name="apic.password" value="!n0r1t5@C"/>
+
     <!-- Login -->
     <target name="login">
         <echo message="Logging into API Connect at ${apic.server}..."/>
-        <exec executable="/usr/local/bin/apic" failonerror="true">
-            <arg value="login"/>
-            <arg value="--server=${apic.server}"/>
-            <arg value="--username=${apic.username}"/>
-            <arg value="--password=${apic.password}"/>
-            <arg value="--realm=${apic.realm}"/>
-            <arg value="--accept-license"/>
+        <exec executable="/bin/bash" failonerror="true">
+            <arg value="-c"/>
+            <arg value="/usr/local/bin/apic login --server=${apic.server} --username=${apic.username} --password=${apic.password} --realm=${apic.realm} --accept-license"/>
         </exec>
     </target>
 
-    <!-- Validate API + Product -->
-    <target name="validate" depends="login">
+    <!-- Validate API -->
+    <target name="validate-api" depends="login">
         <echo message="Validating API file: ${api.file}"/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="validate"/>
             <arg value="${api.file}"/>
             <arg value="--accept-license"/>
         </exec>
+    </target>
 
+    <!-- Validate Product -->
+    <target name="validate-product" depends="login">
         <echo message="Validating Product file: ${product.file}"/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="validate"/>
@@ -37,9 +45,9 @@
         </exec>
     </target>
 
-    <!-- Publish -->
-    <target name="publish" depends="validate">
-        <echo message="Publishing API product: ${product.file} to org=${apic.org}, catalog=${apic.catalog}"/>
+    <!-- Publish Product -->
+    <target name="publish" depends="validate-api,validate-product">
+        <echo message="Publishing Product: ${product.file} to org=${apic.org}, catalog=${apic.catalog}"/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="publish"/>
             <arg value="${product.file}"/>
@@ -50,21 +58,21 @@
         </exec>
     </target>
 
-    <!-- Deploy (Replace Product in Catalog) -->
+    <!-- Deploy Product -->
     <target name="deploy" depends="publish">
-        <echo message="Deploying (replacing) API product: ${product.file} into org=${apic.org}, catalog=${apic.catalog}"/>
+        <echo message="Deploying Product: ${product.name} to org=${apic.org}, catalog=${apic.catalog}"/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
-            <arg value="products:replace"/>
+            <arg value="deploy"/>
+            <arg value="${product.name}"/>
             <arg value="--server=${apic.server}"/>
             <arg value="--org=${apic.org}"/>
             <arg value="--catalog=${apic.catalog}"/>
-            <arg value="${product.file}"/>
             <arg value="--accept-license"/>
         </exec>
     </target>
 
     <!-- Logout -->
-    <target name="logout" alwaysRun="true">
+    <target name="logout">
         <echo message="Logging out of API Connect..."/>
         <exec executable="/usr/local/bin/apic" failonerror="false">
             <arg value="logout"/>
@@ -73,9 +81,9 @@
         </exec>
     </target>
 
-    <!-- Pipeline wrapper (ensures logout always runs) -->
-    <target name="pipeline">
-        <antcall target="deploy"/>
+    <!-- Pipeline wrapper to always run logout -->
+    <target name="pipeline" depends="deploy">
         <antcall target="logout"/>
     </target>
+
 </project>
