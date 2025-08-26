@@ -1,71 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="apic-ci-cd" default="deploy" basedir=".">
+    <description>
+        Ant script for IBM API Connect CI/CD automation.
+    </description>
 
-    <!-- Load environment properties dynamically -->
+    <!-- Load environment properties dynamically (env passed via -Denv=dev/test/prod) -->
     <property file="environments/${env}.properties"/>
 
-    <!-- Accept License -->
-    <target name="accept-license">
-        <echo message="Accepting IBM API Connect license..."/>
-        <exec executable="/usr/local/bin/apic" failonerror="true">
-            <arg value="accept-license"/>
-            <arg value="--accept"/>
+    <!-- Login -->
+    <target name="login">
+        <echo message="Logging into API Connect at ${apic.server}..."/>
+        <exec executable="/bin/bash" failonerror="true">
+            <arg value="-c"/>
+            <arg value="/usr/local/bin/apic login --server=${apic.server} --username=${apic.username} --password=${apic.password} --realm=${apic.realm} --accept-license"/>
         </exec>
     </target>
 
-    <!-- Login -->
-    <target name="login" depends="accept-license">
-        <echo message="Logging into API Connect..."/>
+    <!-- Validate API + Product -->
+    <target name="validate" depends="login">
+        <echo message="Validating API file: ${api.file}"/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
-            <arg value="login"/>
-            <arg value="--server=${apic.server}"/>
-            <arg value="--username=${apic.username}"/>
-            <arg value="--password=${apic.password}"/>
-            <arg value="--realm=${apic.realm}"/>
+            <arg value="validate"/>
+            <arg value="${api.file}"/>
+            <arg value="--accept-license"/>
+        </exec>
+
+        <echo message="Validating Product file: ${product.file}"/>
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="validate"/>
+            <arg value="${product.file}"/>
             <arg value="--accept-license"/>
         </exec>
     </target>
 
-    <!-- Validate API -->
-    <target name="validate-api" depends="login">
-        <echo message="Validating API ${api.file} ..."/>
-        <exec executable="/usr/local/bin/apic" failonerror="true">
-            <arg value="validate"/>
-            <arg value="${api.file}"/>
-        </exec>
-    </target>
-
-    <!-- Validate Product -->
-    <target name="validate-product" depends="login">
-        <echo message="Validating Product ${product.file} ..."/>
-        <exec executable="/usr/local/bin/apic" failonerror="true">
-            <arg value="validate"/>
-            <arg value="${product.file}"/>
-        </exec>
-    </target>
-
-    <!-- Publish Product -->
-    <target name="publish" depends="validate-api,validate-product">
-        <echo message="Publishing Product to Catalog..."/>
+    <!-- Publish -->
+    <target name="publish" depends="validate">
+        <echo message="Publishing API product: ${product.file} to org=${apic.org}, catalog=${apic.catalog}"/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="publish"/>
             <arg value="${product.file}"/>
             <arg value="--server=${apic.server}"/>
             <arg value="--org=${apic.org}"/>
             <arg value="--catalog=${apic.catalog}"/>
+            <arg value="--accept-license"/>
         </exec>
     </target>
 
-    <!-- Deploy Product -->
+    <!-- Deploy (Replace Product in Catalog) -->
     <target name="deploy" depends="publish">
-        <echo message="Deploying Product ${product.name} to Catalog..."/>
+        <echo message="Deploying (replacing) API product: ${product.file} into org=${apic.org}, catalog=${apic.catalog}"/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
-            <arg value="deploy"/>
-            <arg value="${product.name}"/>
+            <arg value="products:replace"/>
             <arg value="--server=${apic.server}"/>
             <arg value="--org=${apic.org}"/>
             <arg value="--catalog=${apic.catalog}"/>
+            <arg value="${product.file}"/>
+            <arg value="--accept-license"/>
         </exec>
     </target>
 
+    <!-- Logout -->
+    <target name="logout">
+        <echo message="Logging out of API Connect..."/>
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <arg value="logout"/>
+            <arg value="--server=${apic.server}"/>
+            <arg value="--accept-license"/>
+        </exec>
+    </target>
 </project>
