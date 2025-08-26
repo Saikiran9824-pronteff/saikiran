@@ -1,10 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="apic-ci-cd" default="deploy" basedir=".">
 
-    <!-- Load env properties -->
+    <!-- Load environment properties dynamically -->
     <property file="environments/${env}.properties"/>
+
+    <!-- Accept License -->
+    <target name="accept-license">
+        <echo message="Accepting IBM API Connect license..."/>
+        <exec executable="/bin/bash" failonerror="true">
+            <arg value="-c"/>
+            <arg value="/usr/local/bin/apic --accept-license"/>
+        </exec>
+    </target>
 
     <!-- Login -->
     <target name="login" depends="accept-license">
+        <echo message="Logging into API Connect..."/>
         <exec executable="/bin/bash" failonerror="true">
             <arg value="-c"/>
             <arg value="/usr/local/bin/apic login --server=${apic.server} --username=${apic.username} --password=${apic.password} --realm=${apic.realm} --accept-license"/>
@@ -13,6 +24,7 @@
 
     <!-- Validate API -->
     <target name="validate-api" depends="login">
+        <echo message="Validating API ${api.file} ..."/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="validate"/>
             <arg value="${api.file}"/>
@@ -21,6 +33,7 @@
 
     <!-- Validate Product -->
     <target name="validate-product" depends="login">
+        <echo message="Validating Product ${product.file} ..."/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="validate"/>
             <arg value="${product.file}"/>
@@ -29,6 +42,7 @@
 
     <!-- Publish Product -->
     <target name="publish" depends="validate-api,validate-product">
+        <echo message="Publishing Product to Catalog..."/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="publish"/>
             <arg value="${product.file}"/>
@@ -38,8 +52,9 @@
         </exec>
     </target>
 
-    <!-- Deploy API -->
+    <!-- Deploy Product -->
     <target name="deploy" depends="publish">
+        <echo message="Deploying Product ${product.name} to Catalog..."/>
         <exec executable="/usr/local/bin/apic" failonerror="true">
             <arg value="deploy"/>
             <arg value="${product.name}"/>
@@ -48,5 +63,5 @@
             <arg value="--catalog=${apic.catalog}"/>
         </exec>
     </target>
-</project>
 
+</project>
