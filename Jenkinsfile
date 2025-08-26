@@ -42,7 +42,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-org/apic-cicd.git'
+                git branch: 'main', url: 'https://github.com/Saikiran9824-pronteff/saikiran.git'
             }
         }
 
@@ -101,3 +101,4 @@ pipeline {
         }
     }
 }
+
