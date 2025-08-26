@@ -4,6 +4,12 @@
     <!-- Load environment properties dynamically -->
     <property file="environments/${env}.properties"/>
 
+    <target name="show-env">
+        <echo message="Using environment: ${env}"/>
+        <echo message="API file: ${api.file}"/>
+        <echo message="Product file: ${product.file}"/>
+    </target>
+
     <!-- Accept License -->
     <target name="accept-license">
         <echo message="Accepting IBM API Connect license..."/>
@@ -14,7 +20,7 @@
     </target>
 
     <!-- Login -->
-    <target name="login" depends="accept-license">
+    <target name="login" depends="accept-license,show-env">
         <echo message="Logging into API Connect..."/>
         <exec executable="/bin/bash" failonerror="true">
             <arg value="-c"/>
