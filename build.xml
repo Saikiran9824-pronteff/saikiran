@@ -7,11 +7,10 @@
     <!-- Load environment properties dynamically -->
     <property file="environments/${env}.properties"/>
 
-    <!-- ---------------- Login ---------------- -->
+    <!-- Login -->
     <target name="login">
         <echo message="Logging into API Connect at ${apic.server}..."/>
         <exec executable="/bin/bash" failonerror="true">
-            <!-- Pass env properties as Bash environment variables -->
             <env key="APIC_SERVER" value="${apic.server}"/>
             <env key="APIC_USERNAME" value="${apic.username}"/>
             <env key="APIC_PASSWORD" value="${apic.password}"/>
