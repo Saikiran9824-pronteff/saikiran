@@ -1,26 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="apic-ci-cd-login" default="login" basedir=".">
-    <description>
-        Ant script for IBM API Connect CI/CD automation (Login only)
-    </description>
+<project name="apic-ci-cd" default="login" basedir=".">
+    <description>Ant script for IBM API Connect login only</description>
 
-    <!-- Load environment properties dynamically -->
+    <!-- Load environment properties dynamically (env passed via -Denv=dev/test/prod) -->
     <property file="environments/${env}.properties"/>
 
-    <!-- Login -->
+    <!-- Login Target -->
     <target name="login">
         <echo message="Logging into API Connect at ${apic.server}..."/>
-        <exec executable="/bin/bash" failonerror="true">
-            <!-- Pass Ant properties as environment variables -->
-            <env key="APIC_SERVER" value="${apic.server}"/>
-            <env key="APIC_USERNAME" value="${apic.username}"/>
-            <env key="APIC_PASSWORD" value="${apic.password}"/>
-            <env key="APIC_REALM" value="${apic.realm}"/>
-            
-            <!-- Bash command references env vars, not Ant props -->
-            <arg value="-c"/>
-            <arg value="/usr/local/bin/apic login --server=$APIC_SERVER --username=$APIC_USERNAME --password=$APIC_PASSWORD --realm=$APIC_REALM --accept-license"/>
+        <exec executable="/usr/local/bin/apic" failonerror="true">
+            <!-- Pass properties as arguments instead of Bash env substitution -->
+            <arg value="login"/>
+            <arg value="--server=${apic.server}"/>
+            <arg value="--username=${apic.username}"/>
+            <arg value="--password=${apic.password}"/>
+            <arg value="--realm=${apic.realm}"/>
+            <arg value="--accept-license"/>
         </exec>
     </target>
-
 </project>
